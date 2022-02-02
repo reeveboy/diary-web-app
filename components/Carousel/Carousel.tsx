@@ -1,81 +1,58 @@
-import React, { useState } from "react";
-import Item from "./Item";
-import { AnimateSharedLayout } from "framer-motion";
-
-export interface item {
-  number?: number;
-  special?: string;
+import React, { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+interface Note {
+  day: number;
+  note: string;
 }
 
 interface Props {
-  items: item[];
-  active: number;
+  notes: Note[];
 }
 
-const Carousel = ({ items }: Props) => {
-  const [active, setActive] = useState(items.length - 1);
+const Carousel = ({ notes }: Props) => {
+  const [width, setWidth] = useState(0);
+  const carousel = useRef(null);
 
-  function moveLeft() {
-    setActive((prev) => (prev <= 1 ? prev : prev - 1));
-  }
-  function moveRight() {
-    setActive((prev) => (prev > items.length - 2 ? prev : prev + 1));
-  }
-  function generateItems() {
-    let screenItems = [];
-
-    for (let i = active - 1; i < active + 2; i++) {
-      let index = i;
-      let flag = false;
-      if (i >= items.length) flag = true;
-
-      let level = Math.abs(active - i);
-
-      if (flag) {
-        screenItems.push(
-          <Item key={index} item={{ special: "+" }} level={level} />
-        );
-        continue;
-      }
-
-      screenItems.push(<Item key={index} item={items[index]} level={level} />);
-    }
-
-    return screenItems;
-  }
+  useEffect(() => {
+    setWidth(carousel.current.scrollWidth - carousel.current.offsetWidth);
+  }, [carousel]);
 
   return (
-    <div className="flex justify-center items-center p-4">
-      <div onClick={moveLeft}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
-          fill="currentColor"
-          className="bi bi-arrow-left"
-          viewBox="0 0 16 16">
-          <path
-            fillRule="evenodd"
-            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"
-          />
-        </svg>
-      </div>
-      <AnimateSharedLayout>{generateItems()}</AnimateSharedLayout>
-      <div onClick={moveRight}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
-          fill="currentColor"
-          className="bi bi-arrow-right"
-          viewBox="0 0 16 16">
-          <path
-            fillRule="evenodd"
-            d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"
-          />
-        </svg>
-      </div>
-    </div>
+    <motion.div
+      ref={carousel}
+      whileTap={{ cursor: "grabbing" }}
+      className="cursor-grab overflow-hidden">
+      <motion.div
+        drag="x"
+        dragConstraints={{ right: width, left: -width }}
+        className="flex justify-center">
+        {notes.map((note, idx) => {
+          return (
+            <motion.div
+              className="flex flex-col items-center m-4"
+              key={idx}
+              whileTap={{ scale: 1.1 }}>
+              <span className="text-white font-extralight">Day {note.day}</span>
+              <motion.div className="p-4 text-ellipsis overflow-hidden min-h-[250px] max-h-[250px] min-w-[250px] bg-[#D0F9FF] rounded-lg">
+                <span className="mt-2 text-sm">{note.note}</span>
+              </motion.div>
+            </motion.div>
+          );
+        })}
+        <motion.div
+          className="flex flex-col items-center justify-end m-4"
+          whileTap={{ scale: 1.1 }}>
+          <div className="flex justify-center items-center p-4 text-ellipsis overflow-hidden min-h-[250px] max-h-[250px] min-w-[250px] bg-[#D0F9FF] rounded-lg">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/1237/1237946.png"
+              alt=""
+              height={40}
+              width={40}
+            />
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

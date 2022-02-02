@@ -21,7 +21,7 @@ const Head = ({ children }: Props) => {
           rel="stylesheet"
         />
       </NextHead>
-      <div className="flex h-screen">{children}</div>
+      <div className="flex h-screen bg-[#060817]">{children}</div>
     </>
   );
 };
